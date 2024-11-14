@@ -1,0 +1,2 @@
+At first was thinking different databases when omebody suggested different branches on call. After thinking about it I think that could be right move. Just have different machines (prod,staging,local) sitting on different branches.
+
