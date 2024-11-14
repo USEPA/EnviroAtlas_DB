@@ -1,2 +1,5 @@
-*.db-wal
+#dont check in the shm and wal
 *.db-shm
+*.db-wal
+#also don't check in the session db
+session.db
