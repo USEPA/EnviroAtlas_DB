@@ -3,3 +3,5 @@
 *.db-wal
 #also don't check in the session db
 session.db
+#don't check in local db stuff in development
+local/*
