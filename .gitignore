@@ -1,7 +1,14 @@
+# Dependency directory
+# https://docs.npmjs.com/misc/faq#should-i-check-my-node-modules-folder-into-git
+node_modules
+
+#Web Storm Settings
+.idea
+
 #dont check in the shm and wal
 *.db-shm
 *.db-wal
 #also don't check in the session db
 session.db
 #don't check in local db stuff in development
-local/*
+db/local/*
