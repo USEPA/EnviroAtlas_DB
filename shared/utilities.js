@@ -37,5 +37,51 @@ utilities.pathExists = async function (path) {
     return defer.promise;
 };
 
+utilities.csv = {
+    read: async function (filepath) {
+        const fs = require('fs');
+        const csv = require('csv');
+
+        let defer = new utilities.Deferred();
+
+        let fields = {};
+        let rows = [];
+        let rowCount=0;
+
+        fs.createReadStream(filepath)
+            .pipe(csv.parse())
+            .on('data', (arrayRow) => {
+                if (rowCount===0) {
+                    fields = arrayRow;
+                } else {
+                    let objectRow = {};
+                    for (let [i,value] of Object.entries(arrayRow)) {
+                        let field = fields[i];
+                        objectRow[field] = value;
+                    }
+                    rows.push(objectRow);
+                }
+                rowCount += 1;
+            })
+            .on('end', () => {
+                defer.resolve({fields,rows});
+            });
+
+        return defer.promise
+    },
+    write: function (data,filepath) {
+        const fs = require('fs');
+        const csv = require('csv');
+
+        const writableStream = fs.createWriteStream(filepath);
+
+        const stringifier = csv.stringify({ header: true, columns: data.fields });
+        for (let row of data.rows) {
+            stringifier.write(row);
+        }
+        stringifier.pipe(writableStream);
+    }
+};
+
 module.exports = utilities;
 
