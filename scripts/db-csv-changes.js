@@ -17,12 +17,20 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
         help.push('This tool imports data into sqlite from csv.');
         help.push('csv files saved in dev folder will be imported into staging db and csv files moved to staging folder');
         help.push('csv files saved in staging folder will be imported into prod db and csv files moved to prod folder');
+        help.push('');
         help.push('db-csv-changes <cmd> <db> <change>');
+        help.push('');
         help.push('cmd = list, load or deploy');
+        help.push('');
         help.push('list: list all changes in db=<db>');
         help.push('eg. db-csv-changes list staging would list all csv change folders in staging folder');
+        help.push('');
+        help.push('init: create insert file with header in change = <change> for table=<table> in db=<db>');
+        help.push('eg. db-csv-changes init staging change1 layers would create staging/change2/layers-insert.csv file with all fields as header');
+        help.push('');
         help.push('load: load change = <change> to db=<db>');
         help.push('eg. db-csv-changes load staging * would import all csv files in staging folder to staging db');
+        help.push('');
         help.push('deploy: deploy change = <change> to db=<db> from db one level down and move csv file to db=<db> folder</db>');
         help.push('eg. db-csv-changes deploy prod change1 would import csv files in staging/change1 folder into prod db and then move staging/change1 folder to prod folder');
         help.push('');
@@ -34,11 +42,13 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
 
         let cmd = "";
 //        cmd = "list";
+//        cmd = "init";
 //        cmd = "load";
 //        cmd = "deploy";
         if (args._.length>0) cmd = args._[0];
 
         let db = "";
+//        db = "local";
 //        db = "staging";
 //        db = "prod";
         if (args._.length>1) db = args._[1];
@@ -46,16 +56,25 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
         let change = "";
 //        change = "change1";
 //        change = "change2";
+//        change = "change3";
         if (args._.length>2) change = args._[2];
+
+        let table = "";
+//        table = "layers";
+//        table = "subtopics";
+        if (args._.length>3) change = args._[3];
 
         if (cmd) {
             if (!db) throw 'db is required';
+            let dbfile = `${appRoot.path}\\db\\${db}\\${db}.db`;
+            let dbLib = new db_sqlite({dbfile,config});
+
             if (['deploy','load'].includes(cmd)) {
                 if (cmd==='deploy' && !['staging','prod'].includes(db)) {
                     throw 'change can only be deployed to db = staging or prod';
                 }
                 if (!change) {
-                    throw 'change file name is required for cmd=deploy or load';
+                    throw 'change folder name is required for cmd=deploy or load';
                 }
 
                 let srcDb;
@@ -68,43 +87,75 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
                     srcDb = db;
                     destDb = db;
                 }
-                let files;
+                let changeFolders;
                 if (change==='*')  {
-                    files = await getAllChangeFiles(srcDb);
+                    changeFolders = await getAllChangeFiles(srcDb);
                 } else {
-                    files = [change];
+                    changeFolders = [change];
                 }
 
-                let dbfile = `${appRoot.path}\\db\\${destDb}\\${destDb}.db`;
-                let dbLib = new db_sqlite({dbfile,config});
-
-                for (let file of files) {
-                    let srcPath = `${appRoot.path}\\changes\\${srcDb}\\${file}`;
-                    let destPath = `${appRoot.path}\\changes\\${destDb}\\${file}`;
+                for (let changeFolder of changeFolders) {
+                    let srcChangeFolder = `${appRoot.path}\\changes\\${srcDb}\\${changeFolder}`;
+                    let destChangeFolder = `${appRoot.path}\\changes\\${destDb}\\${changeFolder}`;
                     //                   console.log(src);
                     //                   console.log(dest);
-                    let sourceExists = await utilities.pathExists(srcPath);
+                    let sourceExists = await utilities.pathExists(srcChangeFolder);
                     if (!sourceExists) {
                         throw `change = ${change} does not exist in source db = ${srcDb}`;
                     }
 
                     if (['deploy','load'].includes(cmd)) {
                         //have to write csv changes to DB. then copy to deployed folder if applicable
-                        let changeFiles = await fse.readdir(srcPath);
+                        let changeFiles = await fse.readdir(srcChangeFolder);
                         for (let changeFile of changeFiles) {
-                            await dbLib.writeFromCSV({csvfile:`${srcPath}\\${changeFile}`});
+                            await dbLib.writeFromCSV({csvfile:`${srcChangeFolder}\\${changeFile}`});
+                        }
+                        if (!changeFolders.length) {
+                            console.log(`No change files avaiable in change folder = ${srcChangeFolder} for import to dest db = ${db}`);
                         }
                         if (cmd==='deploy') {
-                            await fse.move(srcPath,destPath);
+                            await fse.move(srcChangeFolder,destChangeFolder);
                         }
                     }
 
-                    console.log(srcDb + '/' + file + ' loaded into ' + destDb);
+                    console.log(srcDb + '/' + changeFolder + ' loaded into ' + destDb);
                 }
-                if (!files.length) {
-                    console.log(`No change files avaiable for import to dest db = ${db}`);
+                if (!changeFolders.length) {
+                    console.log(`No change folders avaiable for import to dest db = ${db}`);
                 }
 
+            } else if (cmd==='init') {
+
+                //check if change folder exists
+                if (!change) {
+                    throw 'change folder name is required for cmd=init';
+                }
+                let changeFolder = `${appRoot.path}\\changes\\${db}\\${change}`;
+                let changeExists = await utilities.pathExists(changeFolder);
+                if (!changeExists) {
+                    await fse.mkdir(changeFolder);
+                }
+                //if table passed then create insert csv file with all fields in header but no rows
+                if (table) {
+                    //check if insert csv file already exists
+                    let insertCsvfile = `${changeFolder}\\${table}-insert.csv`;
+
+                    let insertExists = await utilities.pathExists(insertCsvfile);
+                    if (!insertExists) {
+                        //get all the fields in the passed table to create header with
+                        let dbSchema = await dbLib.schema({table:table});
+                        console.log(dbSchema);
+                        let dbFields = dbSchema.map(item=>item.name);
+                        let csvObj = {fields:dbFields,rows:[]};
+                        await utilities.csv.write(csvObj,insertCsvfile);
+
+                        console.log(`Insert CSV file ${insertCsvfile} initialized`)
+                    } else {
+                        console.log(`Warning: insert CSV file ${insertCsvfile} already exists`)
+                    }
+
+
+                }
             } else if (cmd==='list') {
 //just list folders
                 let files = await getAllChangeFiles(db);

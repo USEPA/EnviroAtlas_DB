@@ -10,6 +10,8 @@ let dbfile = baseDir + 'db\\staging\\staging.db';
 
 let db = new db_sqlite({dbfile,config});
 (async function () {
+    writeCSV();
+    return;
     try {
         /*
         let values = {categoryTab:'ESB',name:'%Percent agriculture%'};
@@ -28,3 +30,41 @@ let db = new db_sqlite({dbfile,config});
     db.close();
 });
 
+function writeCSV() {
+    const fs = require('fs');
+    const csv = require('csv');
+    const stringify = csv.stringify;
+
+    const data = [
+        { name: 'Alice', age: 25 },
+        { name: 'Bob', age: 30 },
+        { name: 'Charlie', age: 35 },
+        { name: 'xxx' }
+    ];
+
+    let fields = ['name','age'];
+    const stringifier = stringify({ header: true ,fields});
+    let file = 'output.csv';
+
+//    return utilities.csv.write({fields,rows:data},file);
+    return utilities.csv.write({fields,rows:[]},file);
+
+
+    const writeStream = fs.createWriteStream(file);
+
+    stringifier.pipe(writeStream);
+
+    data.forEach(row => {
+        stringifier.write(row);
+    });
+
+    stringifier.end();
+
+    writeStream.on('finish', () => {
+        console.log('CSV file written successfully!');
+    });
+
+    writeStream.on('error', (err) => {
+        console.error('Error writing CSV file:', err);
+    });
+}

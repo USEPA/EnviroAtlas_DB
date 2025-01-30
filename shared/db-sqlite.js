@@ -14,7 +14,7 @@ let db_sqlite = class db_sqlite {
     close () {
         this.db.close();
     }
-    prepare ({type,table,fields,key,where}) {
+    prepare ({type,table,fields,key,where,limit}) {
         if (!type) throw new Error('type is required to create delete prepare statement');
         if (!table) throw new Error('table is required to create delete prepare statement');
         let statement;
@@ -49,9 +49,11 @@ let db_sqlite = class db_sqlite {
                 where = `${key} = $${key}`;
             }
             if (where) statement += ` WHERE ${where}`;
+            if (limit) statement += ` LIMIT ${limit}`;
+        } else if (type === 'schema') {
+            statement = `PRAGMA table_info(${table})`;
         }
-
-        console.log(statement);
+//        console.log(statement);
 
         let prepared = this.db.prepare(statement);
 
@@ -59,7 +61,7 @@ let db_sqlite = class db_sqlite {
             let {type='run',values} = args;
             if (key && !(key in values)) throw new Error('key defined but not contained in values');
 
-            return prepared[type](values);
+            return prepared[type](values || []);
         };
 
         let run = function (args={}) {
@@ -74,14 +76,22 @@ let db_sqlite = class db_sqlite {
     }
 
     async select(args) {
-        let {table,fields,keyValue,where,values} = args;
+        let {table,fields,keyValue,where,values,limit} = args;
         let key;
         if (!where && 'keyValue' in args) {
             key = this.config.tables[table].key;
             values = {[key]:keyValue};
         }
-        let select = this.prepare({type:'select',table,fields,key,where});
+        let select = this.prepare({type:'select',table,fields,key,where,limit});
         let result = select.all({values});
+        return result;
+    }
+
+    //call this schema instead of pragma since that's already being used
+    async schema(args) {
+        let {table} = args;
+        let schema = this.prepare({type:'schema',table});
+        let result = schema.all();
         return result;
     }
 
@@ -93,6 +103,7 @@ let db_sqlite = class db_sqlite {
         let table = splitFileName[0];
         let tableConfig = this.config.tables[table];
         if (!tableConfig) throw new Error(`table = ${table} must be set up in db-csv-changes.config`);
+//        let requireKeyInCSV = 'requireKeyInCSV' in this.config ? this.config.requireKeyInCSV : true;
         let type = splitFileName[1];
         if (!(['insert','update','delete'].includes(type))) throw new Error(`type = ${type} must be equal to insert, update or delete`);
         let key = tableConfig.key;
@@ -106,21 +117,57 @@ let db_sqlite = class db_sqlite {
 
         let csvChanged = false;
 
-        let prepareArgs = {type,table,fields,key,where};
+        let prepareArgs = {type,table,fields,where};
+        //if key is in csv fields then set on prepare
+        if (fields.includes(key)) prepareArgs.key = key;
+
         let command = this.prepare(prepareArgs);
-        for (let row of csvObj.rows) {
-            let result;
+        let rowCount=0;
+        for (let csvRow of csvObj.rows) {
+            rowCount+=1;
             if (type==='insert') {
-                result = await this.select({table,keyValue:row[key],fields:[key]});
-                console.log(result);
-                //if this key already found in DB continue instead of throwing error
-                if (result.length) {
-                    console.log(`key = ${key} with value = ${row[key]} already exists in table = ${table}`);
-                    continue;
+                if (rowCount===1) {
+                    //for first row get the fields for insert
+                    let dbRows = await this.select({table,limit:1});
+//                    console.log(dbRows);
+                    if (!dbRows.length) {
+                        console.log(`Warning: Can no validate insert fields because no rows were found in table = ${table}`);
+                    }
+                    let missingFields = [];
+                    let extraFields = {};
+                    for (let csvField of Object.keys(csvRow) ) {
+                        extraFields[csvField] = 1;
+                    }
+                    let dbFields = Object.keys(dbRows[0]);
+                    for (let dbField of dbFields) {
+                        if (dbField!==key && !(dbField in csvRow)) {
+                            missingFields.push(dbField);
+                        } else {
+                            delete extraFields[dbField];
+                        }
+                    }
+                    if (Object.keys(extraFields).length) {
+                        console.log(`Warning: The fields ${Object.keys(extraFields).join(',')} from the CSV can not be inserted because they do not exist in the table = ${table}`);
+                    }
+                    if (missingFields.length) {
+                        console.log(`Can no insert CSV into table = ${table} because it is missing the fields ${missingFields.join(',')}`);
+                        break;
+                    }
+
+                }
+                //if key is in fields then need to check to see if this row is already in DB based on key
+                if (fields.includes(key)) {
+                    let dbRows = await this.select({table,keyValue:csvRow[key],fields:[key]});
+//                    console.log(dbRows);
+                    //if this key already found in DB continue instead of throwing error
+                    if (dbRows.length) {
+                        console.log(`key = ${key} with value = ${csvRow[key]} already exists in table = ${table}`);
+                        continue;
+                    }
                 }
             }
 
-            result = command.run({values:row});
+            let result = command.run({values:csvRow});
 
             //check if csv originally has the key. if not then add it in there so we don't get repeats
             if (type==='insert' && !(fields.includes(key))) {
@@ -129,12 +176,12 @@ let db_sqlite = class db_sqlite {
                 //get the key value from sqlite lastInsertRowid
                 let keyValue=result.lastInsertRowid;
                 console.log(keyValue);
-                row[key] = keyValue;
+                csvRow[key] = keyValue;
                 //mark that csv changed so we know whether to update the csv file
                 csvChanged = true;
             }
         }
-        console.log(csvObj);
+//        console.log(csvObj);
         //if csv changed because row inserted without key and key needs to be added to csv so row isn't inserted again
         if (csvChanged) {
             utilities.csv.write(csvObj,csvfile);

@@ -69,17 +69,29 @@ utilities.csv = {
 
         return defer.promise
     },
-    write: function (data,filepath) {
+    write: async function (data,filepath) {
+        let defer = new utilities.Deferred();
         const fs = require('fs');
         const csv = require('csv');
 
         const writableStream = fs.createWriteStream(filepath);
 
+        writableStream.on('finish', () => {
+            defer.resolve();
+        });
+
+        writableStream.on('error', (err) => {
+            defer.error(err);
+        });
+
         const stringifier = csv.stringify({ header: true, columns: data.fields });
+        stringifier.pipe(writableStream);
         for (let row of data.rows) {
             stringifier.write(row);
         }
-        stringifier.pipe(writableStream);
+        stringifier.end();
+
+        return defer.promise
     }
 };
 
