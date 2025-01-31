@@ -2,7 +2,10 @@ On staging will be staging/staging.db file
 On prod will be prod/prod.db file
 In local dev we can have a local/local.db file which is ignored by git
 
-Steps:
+Developed script called scripts/db-csv-changes consumes csv "snippets" for insert, update and delete. They can be checked in for git which will give version control
+
+
+Steps to directly change sqlite DB:
 
 1)If changing DB on server where API is running and connected to it then need to make sure you disconnect DB Browser Gui and then restart API for changes to go into effect and actually be saved to .db file. Otherwise the changes will be stuck in the .db-wal or .db-shm files. 
 
@@ -14,14 +17,29 @@ Steps:
 
 TLDR
 
-Was thinking we could have different servers sitting on different branches and then merge changes into branches. The problem with that is that you can't merge binaries so you would have to merge the csv. This will not work because you can't import existing rows from the csv, only new rows. You could delete all the rows out of database and then import the csv with changes. Another problem is that merge conflicts could  occur if different branches made changes on the same row. This probably wouldn't occur if the timing of the merges were properly thought out. But this all seems like it could be alot to juggle.
+Was thinking we could have different servers sitting on different branches and then merge changes into branches.
+The problem with that is that you can't merge binaries so you would have to merge the csv.
+This will not work because you can't import existing rows from the csv, only new rows.
+You could delete all the rows out of database and then import the csv with changes.
+Another problem is that merge conflicts could occur if different branches made changes on the same row.
+This probably wouldn't occur if the timing of the merges were properly thought out.
+But this all seems like it could be alot to juggle.
 
-For now staging db and prod db are seperate files. Changes will have to be made independently in each file until we figure out what is really needed to make the management of data easier. 
+For now staging db and prod db are seperate files.
+Changes will have to be made independently in each file until we figure out what is really needed to make the management of data easier.
 
-Did some testing. One thing I noticed is that mod date of db doesn't change when node api is running and connected to db. when node not connected I need to write changes and then close db for mod date to update.
+Did some testing. One thing I noticed is that mod date of db doesn't change when node api is running and connected to db.
+when node not connected I need to write changes and then close db for mod date to update.
 
-Also when I am running the api if I copy the database and then reopen in sql browser then it looks at old version not updated version. I don't understand where changes are saved because when I reopen original/changed version it has the changes. But the changes aren't stored in the file that was copied? It turns out the changes are in the .db-wal file. Not until the connection to database is closed does the changes in .db-wal save to .db file. When both api and browser gui are connected to db, the .db-wal will still be holding changes until both connections are closed.
+Also when I am running the api if I copy the database and then reopen in sql browser then it looks at old version not updated version.
+I don't understand where changes are saved because when I reopen original/changed version it has the changes.
+But the changes aren't stored in the file that was copied? It turns out the changes are in the .db-wal file.
+Not until the connection to database is closed does the changes in .db-wal save to .db file.
+When both api and browser gui are connected to db, the .db-wal will still be holding changes until both connections are closed.
 
-Another problem with making changes then is that changes will not be saved in .db file until node API db connection is closed. This requires API to be restarted. It turns out that node API wasn't closing connection when stopping. I added the db to close on process shutting down and now restart will saved .db file. Note: You also have to make sure that db is closed in the browser gui or the db-wal will not save to .db unless all connections are closed.
+Another problem with making changes then is that changes will not be saved in .db file until node API db connection is closed.
+This requires API to be restarted. It turns out that node API wasn't closing connection when stopping.
+I added the db to close on process shutting down and now restart will save .db file.
+Note: You also have to make sure that db is closed in the browser gui or the db-wal will not save to .db unless all connections are closed.
 
 Also when copying database file over an existing then API will have to be restarted so that .db-wal file will read in new file. 
