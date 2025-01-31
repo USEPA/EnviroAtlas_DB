@@ -12,3 +12,6 @@ node_modules
 session.db
 #don't check in local db stuff in development
 db/local/*
+#don't check in the version of db that api is connected to
+db/staging/staging-api.db
+db/prod/prod-api.db
