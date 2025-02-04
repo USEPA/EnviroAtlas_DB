@@ -62,7 +62,7 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
         let table = "";
 //        table = "layers";
 //        table = "subtopics";
-        if (args._.length>3) change = args._[3];
+        if (args._.length>3) table = args._[3];
 
         if (cmd) {
             if (!db) throw 'db is required';
@@ -88,8 +88,23 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
                     destDb = db;
                 }
                 let changeFolders;
-                if (change==='*')  {
-                    changeFolders = await getAllChangeFiles(srcDb);
+                //if change is number then use that to match possible change folder
+                let isChangeNumber = /^\d+$/.test(change);
+                if (change==='*' || isChangeNumber)  {
+                    let allChangeFolders = await getAllChangeFiles(srcDb);
+                    if (change==='*') {
+                        changeFolders = allChangeFolders;
+                    } else if (isChangeNumber){
+                        //loop over change folder to see if we get match based on leading digits
+                        for (let changeFolder of allChangeFolders) {
+                            let re = new RegExp(`^${change}-`);
+                            if (re.test(changeFolder)) {
+                                changeFolders = [changeFolder];
+                                break;
+                            }
+                        }
+                        if (!changeFolders) throw `numeric change number = ${change} does not exist in source db = ${srcDb}`;
+                    }
                 } else {
                     changeFolders = [change];
                 }
@@ -146,6 +161,7 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
                         let dbSchema = await dbLib.schema({table:table});
                         console.log(dbSchema);
                         let dbFields = dbSchema.map(item=>item.name);
+                        if (!dbSchema.length) throw `table = ${table} can not be initialized because it does not exist`;
                         let csvObj = {fields:dbFields,rows:[]};
                         await utilities.csv.write(csvObj,insertCsvfile);
 
@@ -153,8 +169,6 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
                     } else {
                         console.log(`Warning: insert CSV file ${insertCsvfile} already exists`)
                     }
-
-
                 }
             } else if (cmd==='list') {
 //just list folders

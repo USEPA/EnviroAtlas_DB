@@ -38,7 +38,7 @@ utilities.pathExists = async function (path) {
 };
 
 utilities.csv = {
-    read: async function (filepath) {
+    read: async function (filepath,options={}) {
         const fs = require('fs');
         const csv = require('csv');
 
@@ -48,8 +48,14 @@ utilities.csv = {
         let rows = [];
         let rowCount=0;
 
+        //By default set bom=true when parsing csv otherwise the first value in first row will have byte order mark as first character in string
+        //This will mess up future comparisons of this value that don't have leading BOM.
+        //This could be turned off by passing bom=false to utilities.csv.read({bom:false})
+        let csvParseOptions = {bom:true};
+        if ('bom' in options) csvParseOptions.bom = options.bom;
+
         fs.createReadStream(filepath)
-            .pipe(csv.parse())
+            .pipe(csv.parse(csvParseOptions))
             .on('data', (arrayRow) => {
                 if (rowCount===0) {
                     fields = arrayRow;
