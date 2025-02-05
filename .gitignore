@@ -15,3 +15,6 @@ db/local/*
 #don't check in the version of db that api is connected to
 db/staging/staging-api.db
 db/prod/prod-api.db
+
+#don't check in .dev-link config file because only want to use them to link locally
+.dev-link

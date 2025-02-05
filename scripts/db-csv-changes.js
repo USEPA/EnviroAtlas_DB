@@ -2,9 +2,9 @@
 
 const appRoot = require('app-root-path');
 const fse = require('fs-extra');
-const utilities = require(appRoot + '\\shared\\utilities');
 const db_sqlite = require(appRoot + '\\shared\\db-sqlite');
 const config = require(appRoot + '\\scripts\\db-csv-changes.config');
+const utilities = require('@usepa-ngst/utilities/index.cjs');
 
 //this just to mock up something for now
 let dbSources = {local:'',staging:'local',prod:'staging'};
@@ -78,7 +78,10 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
                 if (!change) {
                     throw 'change folder name is required for cmd=deploy or load';
                 }
-
+                let gitBranch = await getGitBranch(appRoot.path);
+                if (['staging','prod'].includes(db) && gitBranch!=='main') {
+                    throw 'git branch must be equal to main when db=staging or prod for cmd=deploy or load';
+                }
                 let srcDb;
                 let destDb;
                 if (cmd==='deploy') {
@@ -230,4 +233,11 @@ function getTableNames(table) {
         tableNames = table.split(',');
     }
     return tableNames;
+}
+
+async function getGitBranch(dir) {
+    if (!dir) throw 'dir is required to get git branch';
+    let out = await utilities.execExternalCommand({cmd:'git branch --show-current',dir});
+    let branch = out.stdout.trim('\n');
+    return branch;
 }

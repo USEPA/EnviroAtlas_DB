@@ -1,9 +1,21 @@
 {
+  "name": "ea-db",
+  "version": "0.0.1",
+  "private": true,
+  "engines": {
+    "node": "=20.9.0"
+  },
+  "scripts": {
+    "devLink": "usepa-ngst-dev-link npmLink"
+  },
   "dependencies": {
+    "@usepa-ngst/utilities": "^0.0.4",
     "app-root-path": "^3.1.0",
     "better-sqlite3": "^11.2.1",
     "csv": "^6.3.11",
     "fs-extra": "^11.2.0",
     "minimist": "^1.2.8"
+  },
+  "dependenciesComment": {
   }
 }

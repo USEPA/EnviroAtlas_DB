@@ -1,5 +1,5 @@
 const appRoot = require('app-root-path');
-const utilities = require(appRoot + '\\shared\\utilities');
+const utilities = require('@usepa-ngst/utilities/index.cjs');
 const db_sqlite = require(appRoot + '\\shared\\db-sqlite');
 
 const config = require(appRoot + '\\scripts\\db-csv-changes.config');

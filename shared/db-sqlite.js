@@ -1,6 +1,6 @@
 const sqlite3 = require('better-sqlite3');
 const appRoot = require('app-root-path');
-const utilities = require(appRoot + '\\shared\\utilities');
+const utilities = require('@usepa-ngst/utilities/index.cjs');
 
 let db_sqlite = class db_sqlite {
     constructor(options={}) {
