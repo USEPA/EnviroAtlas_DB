@@ -25,8 +25,8 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
         help.push('list: list all changes in db=<db>');
         help.push('eg. db-csv-changes list staging would list all csv change folders in staging folder');
         help.push('');
-        help.push('init: create insert file with header in change = <change> for table=<table> in db=<db>');
-        help.push('eg. db-csv-changes init staging change1 layers would create staging/change2/layers-insert.csv file with all fields as header');
+        help.push('init: create insert file with header in change = <change> for table=<table1>,<table2> in db=<db>');
+        help.push('eg. db-csv-changes init local change1 subtopics,layers would create local/change2/subtopics-insert.csv and local/change2/layers-insert.csv file with all fields as header');
         help.push('');
         help.push('load: load change = <change> to db=<db>');
         help.push('eg. db-csv-changes load staging * would import all csv files in staging folder to staging db');
@@ -36,7 +36,7 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
         help.push('');
         help.push('db = local, staging or prod (local not committed to repo. just for development.)');
         help.push('');
-        help.push('change = name of folder with csv files containing changes. Note: change = * will import all folders for specified db');
+        help.push('change = name of folder with csv files containing changes. Note: change = * will import/init all folders for specified db. table = * will init all tables for specific db.');
 
         let args = require('minimist')(process.argv.slice(2));
 
@@ -54,14 +54,16 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
         if (args._.length>1) db = args._[1];
 
         let change = "";
-//        change = "change1";
-//        change = "change2";
-//        change = "change3";
+//        change = "1-SoilDataChanges";
+//        change = "2-LayerNameAndDownloadSourceChanges";
+//        change = '1';
         if (args._.length>2) change = args._[2];
 
         let table = "";
 //        table = "layers";
 //        table = "subtopics";
+//        table = "subtopics,layers";
+//        table = "*";
         if (args._.length>3) table = args._[3];
 
         if (cmd) {
@@ -87,27 +89,7 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
                     srcDb = db;
                     destDb = db;
                 }
-                let changeFolders;
-                //if change is number then use that to match possible change folder
-                let isChangeNumber = /^\d+$/.test(change);
-                if (change==='*' || isChangeNumber)  {
-                    let allChangeFolders = await getAllChangeFiles(srcDb);
-                    if (change==='*') {
-                        changeFolders = allChangeFolders;
-                    } else if (isChangeNumber){
-                        //loop over change folder to see if we get match based on leading digits
-                        for (let changeFolder of allChangeFolders) {
-                            let re = new RegExp(`^${change}-`);
-                            if (re.test(changeFolder)) {
-                                changeFolders = [changeFolder];
-                                break;
-                            }
-                        }
-                        if (!changeFolders) throw `numeric change number = ${change} does not exist in source db = ${srcDb}`;
-                    }
-                } else {
-                    changeFolders = [change];
-                }
+                let changeFolders = await getChangeFolders(change,srcDb);
 
                 for (let changeFolder of changeFolders) {
                     let srcChangeFolder = `${appRoot.path}\\changes\\${srcDb}\\${changeFolder}`;
@@ -145,34 +127,43 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
                 if (!change) {
                     throw 'change folder name is required for cmd=init';
                 }
-                let changeFolder = `${appRoot.path}\\changes\\${db}\\${change}`;
-                let changeExists = await utilities.pathExists(changeFolder);
-                if (!changeExists) {
-                    await fse.mkdir(changeFolder);
-                }
-                //if table passed then create insert csv file with all fields in header but no rows
-                if (table) {
-                    //check if insert csv file already exists
-                    let insertCsvfile = `${changeFolder}\\${table}-insert.csv`;
 
-                    let insertExists = await utilities.pathExists(insertCsvfile);
-                    if (!insertExists) {
-                        //get all the fields in the passed table to create header with
-                        let dbSchema = await dbLib.schema({table:table});
-                        console.log(dbSchema);
-                        let dbFields = dbSchema.map(item=>item.name);
-                        if (!dbSchema.length) throw `table = ${table} can not be initialized because it does not exist`;
-                        let csvObj = {fields:dbFields,rows:[]};
-                        await utilities.csv.write(csvObj,insertCsvfile);
+                let changeFolders = await getChangeFolders(change,db);
 
-                        console.log(`Insert CSV file ${insertCsvfile} initialized`)
-                    } else {
-                        console.log(`Warning: insert CSV file ${insertCsvfile} already exists`)
+                for (let changeFolderName of changeFolders) {
+                    let changeFolder = `${appRoot.path}\\changes\\${db}\\${changeFolderName}`;
+                    let changeExists = await utilities.pathExists(changeFolder);
+                    if (!changeExists) {
+                        await fse.mkdir(changeFolder);
+                        console.log(`change folder = ${changeFolder} created`);
+                    }
+                    //if table passed then create insert csv file with all fields in header but no rows
+                    if (table) {
+                        let tableNames = getTableNames(table);
+                        for (let tableName of tableNames) {
+                            //check if insert csv file already exists
+                            let insertCsvfile = `${changeFolder}\\${tableName}-insert.csv`;
+
+                            let insertExists = await utilities.pathExists(insertCsvfile);
+                            if (!insertExists) {
+                                //get all the fields in the passed table to create header with
+                                let dbSchema = await dbLib.schema({table:tableName});
+//                                console.log(dbSchema);
+                                let dbFields = dbSchema.map(item=>item.name);
+                                if (!dbSchema.length) throw `table = ${tableName} can not be initialized because it does not exist`;
+                                let csvObj = {fields:dbFields,rows:[]};
+                                await utilities.csv.write(csvObj,insertCsvfile);
+
+                                console.log(`Insert CSV file ${insertCsvfile} initialized`)
+                            } else {
+                                console.log(`Warning: insert CSV file ${insertCsvfile} already exists`)
+                            }
+                        }
                     }
                 }
             } else if (cmd==='list') {
 //just list folders
-                let files = await getAllChangeFiles(db);
+                let files = await getAllChangeFolders(db);
                 console.log(`Change files in db = ${db}`);
                 for (let file of files) {
                     console.log(file);
@@ -196,7 +187,7 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
     process.exit();
 })();
 
-async function getAllChangeFiles(db) {
+async function getAllChangeFolders(db) {
     let dbs = Object.keys(dbSources);
     if (!Object.keys(dbSources).includes(db)) {
         throw `db must be either ${dbs.join(',')}`;
@@ -204,4 +195,39 @@ async function getAllChangeFiles(db) {
     let src = `${appRoot.path}\\changes\\${db}`;
     let files = await fse.readdir(src);
     return files;
+}
+
+async function getChangeFolders(change,db) {
+    let changeFolders;
+    //if change is number then use that to match possible change folder
+    let isChangeNumber = /^\d+$/.test(change);
+    if (change==='*' || isChangeNumber)  {
+        let allChangeFolders = await getAllChangeFolders(db);
+        if (change==='*') {
+            changeFolders = allChangeFolders;
+        } else if (isChangeNumber){
+            //loop over change folder to see if we get match based on leading digits
+            for (let changeFolder of allChangeFolders) {
+                let re = new RegExp(`^${change}-`);
+                if (re.test(changeFolder)) {
+                    changeFolders = [changeFolder];
+                    break;
+                }
+            }
+            if (!changeFolders) throw `numeric change number = ${change} does not exist in db = ${db}`;
+        }
+    } else {
+        changeFolders = [change];
+    }
+    return changeFolders;
+}
+
+function getTableNames(table) {
+    let tableNames;
+    if (table==='*')  {
+        tableNames = Object.keys(config.tables);
+    } else {
+        tableNames = table.split(',');
+    }
+    return tableNames;
 }
