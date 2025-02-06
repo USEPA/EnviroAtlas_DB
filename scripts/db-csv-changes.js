@@ -2,8 +2,11 @@
 
 const appRoot = require('app-root-path');
 const fse = require('fs-extra');
+const path = require('path');
 const db_sqlite = require(appRoot + '\\shared\\db-sqlite');
+const wab = require(appRoot + '\\shared\\wab');
 const config = require(appRoot + '\\scripts\\db-csv-changes.config');
+processConfig(config);
 const utilities = require('@usepa-ngst/utilities/index.cjs');
 
 //this just to mock up something for now
@@ -34,6 +37,9 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
         help.push('deploy: deploy change = <change> to db=<db> from db one level down and move csv file to db=<db> folder</db>');
         help.push('eg. db-csv-changes deploy prod change1 would import csv files in staging/change1 folder into prod db and then move staging/change1 folder to prod folder');
         help.push('');
+        help.push('export: export db=<db> as type=<type> config to json file=<file> ');
+        help.push('eg. db-csv-changes export prod wab ea_prod_wab_config.json would export wab json file from prod db');
+        help.push('');
         help.push('db = local, staging or prod (local not committed to repo. just for development.)');
         help.push('');
         help.push('change = name of folder with csv files containing changes. Note: change = * will import/init all folders for specified db. table = * will init all tables for specific db.');
@@ -45,6 +51,7 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
 //        cmd = "init";
 //        cmd = "load";
 //        cmd = "deploy";
+//        cmd = "export";
         if (args._.length>0) cmd = args._[0];
 
         let db = "";
@@ -57,9 +64,11 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
 //        change = "1-SoilDataChanges";
 //        change = "2-LayerNameAndDownloadSourceChanges";
 //        change = '1';
+//        change = 'wab';
         if (args._.length>2) change = args._[2];
 
         let table = "";
+//        table = 'wab_test_config.json';
 //        table = "layers";
 //        table = "subtopics";
 //        table = "subtopics,layers";
@@ -174,6 +183,17 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
                 if (!files.length) {
                     console.log('None');
                 }
+            } else if (cmd='export') {
+                //3rd argument is usually change
+                let exportType = change;
+                if (exportType!=='wab') throw 'Only WAB export type is currently supported';
+                //4th argument is usually table
+                if (!table) throw 'json file path is required for WAB export';
+                let jsonfile = table;
+                if (!path.isAbsolute(jsonfile)) {
+                    jsonfile = process.cwd() + '\\' + jsonfile;
+                }
+                await wab.writeWabConfig({jsonfile,dbLib});
             } else {
                 throw `cmd = ${cmd} must be list, load or deply`;
             }
@@ -240,4 +260,21 @@ async function getGitBranch(dir) {
     let out = await utilities.execExternalCommand({cmd:'git branch --show-current',dir});
     let branch = out.stdout.trim('\n');
     return branch;
+}
+
+function processConfig(config) {
+    for (let table of Object.values(config.tables)) {
+        if (table.fields) table.fields = getFullFields(table.fields);
+    }
+    return config;
+}
+
+function getFullFields(fields) {
+    let fullFields = [];
+    for (let field of fields) {
+        if (typeof(field)==='string') field= {name:field,type:'text'};
+        if (!field.wabName) field.wabName = field.name;
+        fullFields.push(field);
+    }
+    return fullFields;
 }
