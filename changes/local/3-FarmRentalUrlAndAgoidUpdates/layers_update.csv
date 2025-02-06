@@ -1,0 +1,4 @@
+layerID,agoid,url
+265,2116c0459fd64963894c2e80aac4191d,"https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/Mean_Rental_Rate_Per_Acre_for_Farmland_Irrigated/FeatureServer"
+266,aac58ed62fb24eb991468c062c7db6a2,"https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/Mean_Rental_Rate_Per_Acre_for_Farmland_Non_Irrigated/FeatureServer"
+267,1de6699d4efc4b79ac852b9b7acfd34f,"https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/Mean_Rental_Rate_Per_Acre_for_Farmland_Pasture/FeatureServer"
