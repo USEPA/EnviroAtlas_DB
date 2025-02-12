@@ -194,6 +194,7 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
                     jsonfile = process.cwd() + '\\' + jsonfile;
                 }
                 await wab.writeWabConfig({jsonfile,dbLib});
+                console.log(`WAB JSON config file exported to ${jsonfile} from db=${db}`);
             } else {
                 throw `cmd = ${cmd} must be list, load or deply`;
             }

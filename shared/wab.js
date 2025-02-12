@@ -2,6 +2,17 @@ const sqlite3 = require('better-sqlite3');
 const appRoot = require('app-root-path');
 const utilities = require('@usepa-ngst/utilities/index.cjs');
 
+//Even though this is redundant info, have to put these back in because WAB looks for them.
+const booleanIconMappings = {
+    eaCA: "Clean Air - x",
+    eaFFM: "Food, Fuel, and Materials - x",
+    eaCS: "Climate Stabilization - x",
+    eaNHM: "Natural Hazard Mitigation - x",
+    eaCPW: "Clean and Plentiful Water - x",
+    eaRCA: "Recreation, Culture, and Aesthetics - x",
+    eaBC: "Biodiversity Conservation - x",
+    eaBC: "Biodiversity Conservation -x"
+};
 async function writeWabConfig({jsonfile,dbLib,where,values}) {
     const sw = new utilities.streamWriter();
 
@@ -10,6 +21,12 @@ async function writeWabConfig({jsonfile,dbLib,where,values}) {
     let wabRows = [];
     for (let subtopic of subtopics) {
         let subTopicWabRow = {};
+        for (let [booleanIcon,booleanIconLabel] of Object.entries(booleanIconMappings) ) {
+            if (subtopic[booleanIcon]) {
+                if (!(subTopicWabRow.eaBCSDD)) subTopicWabRow.eaBCSDD = [];
+                subTopicWabRow.eaBCSDD.push(booleanIconLabel);
+            }
+        }
         processRow({wabRow:subTopicWabRow,dbRow:subtopic,fields:dbLib.config.tables.subtopics.fields});
 
         let layers = await dbLib.select({table:'layers',where:'subTopicID = $subTopicID',values:{subTopicID:subtopic.subTopicID}});
@@ -19,8 +36,8 @@ async function writeWabConfig({jsonfile,dbLib,where,values}) {
         let layerWabRow;
         if (layers.length>1) {
             wabRows.push(subTopicWabRow);
-            subTopicWabRow.subLayerID = [];
-            subTopicWabRow.subLayerNames = [];
+            subTopicWabRow.SubLayerIds = [];
+            subTopicWabRow.SubLayerNames = [];
             layerWabRow = {};
         } else {
             layerWabRow = subTopicWabRow;
@@ -28,10 +45,17 @@ async function writeWabConfig({jsonfile,dbLib,where,values}) {
         for (let layer of layers) {
             processRow({wabRow:layerWabRow,dbRow:layer,fields:dbLib.config.tables.layers.fields});
             if (layers.length>1) {
-                subTopicWabRow.subLayerID.push(layer.eaID);
-                subTopicWabRow.subLayerNames.push(layer.subLayerName);
+                layerWabRow.IsSubLayer = true;
+
+                subTopicWabRow.SubLayerIds.push(layer.eaID.toString());
+                subTopicWabRow.SubLayerNames.push(layer.subLayerName);
+                //I guess subTopic also needs areaGeog field which we made only layer field in DB
+                if (!('areaGeog' in subTopicWabRow)) subTopicWabRow.areaGeog = layer.areaGeog.split(',');
+                //also layer also needs the scale from subTopic
+                if ('scale' in subtopic) layerWabRow.eaScale = subtopic.scale;
             }
             wabRows.push(layerWabRow);
+            layerWabRow = {};
         }
     }
     let wabConfig = {layers:{layer:wabRows}};
