@@ -10,9 +10,9 @@ const booleanIconMappings = {
     eaNHM: "Natural Hazard Mitigation - x",
     eaCPW: "Clean and Plentiful Water - x",
     eaRCA: "Recreation, Culture, and Aesthetics - x",
-    eaBC: "Biodiversity Conservation - x",
-    eaBC: "Biodiversity Conservation -x"
+    eaBC: "Biodiversity Conservation - x"
 };
+
 async function writeWabConfig({jsonfile,dbLib,where,values}) {
     const sw = new utilities.streamWriter();
 
@@ -82,5 +82,6 @@ function processRow({dbRow,wabRow,fields}) {
         }
     }
 }
+
 module.exports = {writeWabConfig};
 

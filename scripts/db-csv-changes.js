@@ -69,6 +69,7 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
 
         let table = "";
 //        table = 'wab_test_config.json';
+//        table = 'C:\\AaronEvans\\Projects\\EPA CAM\\EnviroAtlas\\gitrepos\\EnviroAtlas_JSApp\\widgets\\SimpleSearchFilter\\config_layer.json';
 //        table = "layers";
 //        table = "subtopics";
 //        table = "subtopics,layers";
