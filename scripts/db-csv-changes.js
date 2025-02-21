@@ -4,9 +4,6 @@ const appRoot = require('app-root-path');
 const fse = require('fs-extra');
 const path = require('path');
 const db_sqlite = require(appRoot + '\\shared\\db-sqlite');
-const wab = require(appRoot + '\\shared\\wab');
-const config = require(appRoot + '\\scripts\\db-csv-changes.config');
-processConfig(config);
 const utilities = require('@usepa-ngst/utilities/index.cjs');
 
 //this just to mock up something for now
@@ -18,12 +15,22 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
     try {
         let help = [];
         help.push('This tool imports data into sqlite from csv.');
-        help.push('csv files saved in dev folder will be imported into staging db and csv files moved to staging folder');
-        help.push('csv files saved in staging folder will be imported into prod db and csv files moved to prod folder');
+        help.push('For deploy command, csv files saved in dev folder will be imported into staging db and csv files moved to staging folder');
+        help.push('For deploy command, csv files saved in staging folder will be imported into prod db and csv files moved to prod folder');
         help.push('');
-        help.push('db-csv-changes <cmd> <db> <change>');
+        help.push('Note: To run this script from any directory without having to prepend node, it can be installed by:');
+        help.push('cd <directory of EnviroAtla_DB>\\scripts');
+        help.push('npm install .');
         help.push('');
-        help.push('cmd = list, load or deploy');
+        help.push('db-csv-changes <cmd> <db> <change> --exportType <export type> --exportFile <export file> --project <project> --configFile <config file>');
+        help.push('');
+        help.push('Parameters:');
+        help.push('');
+        help.push('db = local, staging or prod (local not committed to repo. just for development.)');
+        help.push('');
+        help.push('change = name of folder with csv files containing changes. Note: change = * will import/init all folders for specified db. table = * will init all tables for specific db.');
+        help.push('');
+        help.push('cmd = list, init, load, deploy, or export');
         help.push('');
         help.push('list: list all changes in db=<db>');
         help.push('eg. db-csv-changes list staging would list all csv change folders in staging folder');
@@ -37,12 +44,18 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
         help.push('deploy: deploy change = <change> to db=<db> from db one level down and move csv file to db=<db> folder</db>');
         help.push('eg. db-csv-changes deploy prod change1 would import csv files in staging/change1 folder into prod db and then move staging/change1 folder to prod folder');
         help.push('');
-        help.push('export: export db=<db> as type=<type> config to json file=<file> ');
-        help.push('eg. db-csv-changes export prod wab ea_prod_wab_config.json would export wab json file from prod db');
+        help.push('export: export db=<db> as type=<export type> config to export file=<export file> ');
+        help.push('eg. db-csv-changes export prod --exportType=ea --exportFile=ea_prod_wab_config.json would export ea wab json file from prod db');
         help.push('');
-        help.push('db = local, staging or prod (local not committed to repo. just for development.)');
+        help.push('--exportType <export type> = exportType is usually equal to the project but can be different if multiple exports set up for single project. export code is set up in shared\exports.');
+        help.push('--exportFile <export file> = path to export file. relative path is relative to folder script called from.');
+        help.push('Note: default exportType and/or exportFile can be set up in config\defaults.js file or in config\projects\<project>.js for each project');
         help.push('');
-        help.push('change = name of folder with csv files containing changes. Note: change = * will import/init all folders for specified db. table = * will init all tables for specific db.');
+        help.push('--project <project> = project config file to be used from config/projects/<project>. default project set up locally in config/project otherwise project=ea');
+        help.push('');
+        help.push('--configFile <config file> = path to config file to be used. relative path is relative to folder script called from. if configFile and project set then configFile is used for config file');
+        help.push('Note: When project used instead of configFile then config/defaults.js can be used to locally override config/projects/<project> fields. when configFile set in command line then config/defaults.js will NOT be used to override its fields.');
+        help.push('config/defaults.js looks like {ea: {exportFile=<local export file>}}');
 
         let args = require('minimist')(process.argv.slice(2));
 
@@ -64,19 +77,54 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
 //        change = "1-SoilDataChanges";
 //        change = "2-LayerNameAndDownloadSourceChanges";
 //        change = '1';
-//        change = 'wab';
         if (args._.length>2) change = args._[2];
 
         let table = "";
-//        table = 'wab_test_config.json';
-//        table = 'C:\\AaronEvans\\Projects\\EPA CAM\\EnviroAtlas\\gitrepos\\EnviroAtlas_JSApp\\widgets\\SimpleSearchFilter\\config_layer.json';
 //        table = "layers";
 //        table = "subtopics";
 //        table = "subtopics,layers";
 //        table = "*";
         if (args._.length>3) table = args._[3];
 
+//        args.exportType = 'ea';
+
+//        args.exportFile = 'wab_test_config.json';
+//        args.exportFile = 'C:\\AaronEvans\\Projects\\EPA CAM\\EnviroAtlas\\gitrepos\\EnviroAtlas_JSApp\\widgets\\SimpleSearchFilter\\config_layer.json';
+
+        let project = args.project;
+        if (!project) {
+            try {
+                project = require(appRoot + '\\config\\project.js');
+            } catch (ex) {
+                project = 'ea';
+            }
+        }
+
+        let configFile;
+        if (args.configFile) {
+            configFile = args.configFile;
+        } else {
+            configFile = `${appRoot}\\config\\projects\\${project}.js`;
+        }
+        if (!(path.isAbsolute(configFile))) {
+            configFile = process.cwd() + '\\' + configFile;
+        }
+
+        let config;
+        try {
+            config = require(configFile);
+        } catch (ex) {
+            if (args.configFile) {
+                throw `config file = ${configFile} found from args.configFile = ${args.configFile} not found`;
+            } else {
+                throw `config file = ${configFile} found from project = ${project} not found`;
+            }
+        }
+        //if config file actually passed then don't over ride with local defaults
+        config = processConfig(config,args.configFile ? null : project );
+
         if (cmd) {
+            console.log(`running cmd=${cmd} for project=${project}`);
             if (!db) throw 'db is required';
             let dbfile = `${appRoot.path}\\db\\${db}\\${db}.db`;
             let dbLib = new db_sqlite({dbfile,config});
@@ -88,9 +136,9 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
                 if (!change) {
                     throw 'change folder name is required for cmd=deploy or load';
                 }
-                let gitBranch = await getGitBranch(appRoot.path);
-                if (['staging','prod'].includes(db) && gitBranch!=='main') {
-                    throw 'git branch must be equal to main when db=staging or prod for cmd=deploy or load';
+                if (['staging','prod'].includes(db)) {
+                    let gitBranch = await getGitBranch(appRoot.path);
+                    if (gitBranch!=='main') throw 'git branch must be equal to main when db=staging or prod for cmd=deploy or load';
                 }
                 let srcDb;
                 let destDb;
@@ -186,16 +234,25 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
                 }
             } else if (cmd='export') {
                 //3rd argument is usually change
-                let exportType = change;
-                if (exportType!=='wab') throw 'Only WAB export type is currently supported';
-                //4th argument is usually table
-                if (!table) throw 'json file path is required for WAB export';
-                let jsonfile = table;
-                if (!path.isAbsolute(jsonfile)) {
-                    jsonfile = process.cwd() + '\\' + jsonfile;
+                let exportType = args.exportType;
+                if (!exportType) exportType = config.exportType;
+                //if export type not set then try to get it from project
+                if (!exportType) exportType = project;
+
+                let exportLib;
+                try {
+                    exportLib = require(appRoot + '\\shared\\exports\\' + exportType);
+                } catch (ex) {
+                    throw `Export type ${exportType} is not currently supported`;
                 }
-                await wab.writeWabConfig({jsonfile,dbLib});
-                console.log(`WAB JSON config file exported to ${jsonfile} from db=${db}`);
+                //4th argument is usually table
+                let exportFile = args.exportFile;
+                if (!exportFile) exportFile = config.exportFile;
+                if (!exportFile) throw 'export file path is required for export';
+                if (!path.isAbsolute(exportFile)) {
+                    exportFile = process.cwd() + '\\' + exportFile;
+                }
+                await exportLib.runExport({exportFile,dbLib});
             } else {
                 throw `cmd = ${cmd} must be list, load or deply`;
             }
@@ -264,7 +321,21 @@ async function getGitBranch(dir) {
     return branch;
 }
 
-function processConfig(config) {
+function processConfig(config,project) {
+    if (project) {
+        //add defaults to config
+        let configDefaults;
+        try {
+            let defaults = require(appRoot + '\\config\\defaults.js');
+//get the defaults for this project
+            configDefaults = defaults[project] || {};
+        } catch (ex) {
+            configDefaults = {};
+        }
+//let local defaults over ride config
+        config = {...config,...configDefaults};
+    }
+
     for (let table of Object.values(config.tables)) {
         if (table.fields) table.fields = getFullFields(table.fields);
     }
@@ -275,7 +346,7 @@ function getFullFields(fields) {
     let fullFields = [];
     for (let field of fields) {
         if (typeof(field)==='string') field= {name:field,type:'text'};
-        if (!field.wabName) field.wabName = field.name;
+        if (!field.exportName) field.exportName = field.name;
         fullFields.push(field);
     }
     return fullFields;

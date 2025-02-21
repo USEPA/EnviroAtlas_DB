@@ -8,11 +8,11 @@ module.exports = {
             fields: [
                 {name: 'subTopicID',type:'integer',key:true,new:true},
                 {name:'eaID',type:'integer'},
-                {name:'topic',wabName:'eaTopic',type:'text'},
+                {name:'topic',exportName:'eaTopic',type:'text'},
                 'categoryTab',
-                {name:'scale',wabName:'eaScale',type:'text'},
+                {name:'scale',exportName:'eaScale',type:'text'},
                 'name',
-                {name:'description',wabName:'eaDescription',type:'text'},
+                {name:'description',exportName:'eaDescription',type:'text'},
                 {name:'eaBC',type:'boolean'},
                 {name:'eaCA',type:'boolean'},
                 {name:'eaCPW',type:'boolean'},
@@ -21,7 +21,7 @@ module.exports = {
                 {name:'eaNHM',type:'boolean'},
                 {name:'eaRCA',type:'boolean'},
                 {name:'eaPBS',type:'text'},
-                {name:'tags',wabName:'eaTags',type:'array'},
+                {name:'tags',exportName:'eaTags',type:'array'},
                 'sourceType'
             ]
         },
@@ -33,17 +33,18 @@ module.exports = {
                 {name:'eaID',type:'integer'},
                 'name',
                 {name:'subLayerName',type:'text',new:true},
-                {name:'description',wabName:'eaDescription',type:'text'},
-                {name:'metric',wabName:'eaMetric',type:'text'},
-                {name:'dfsLink',wabName:'eaDfsLink',type:'text'},
-                {name:'metadataID',wabName:'eaMetadata',type:'text'},
+                {name:'description',exportName:'eaDescription',type:'text'},
+                {name:'metric',exportName:'eaMetric',type:'text'},
+                {name:'dfsLink',exportName:'eaDfsLink',type:'text'},
+                {name:'metadataID',exportName:'eaMetadata',type:'text'},
                 'url',
-                {name:'lyrNum',wabName:'eaLyrNum',type:'integer'},
-                {name:'tags',wabName:'eaTags',type:'array'},
+                {name:'lyrNum',exportName:'eaLyrNum',type:'integer'},
+                {name:'tags',exportName:'eaTags',type:'array'},
                 'tileLink',
                 'tileURL',
-                {name:'serviceType',wabName:'type',type:'text'},
+                {name:'serviceType',exportName:'type',type:'text'},
                 {name:'popup',type:'object'},
+                {name:'popupLayers',exportName:'layers',type:'object'},
                 {name:'numDecimal',type:'integer'},
                 'sourceType',
                 'cacheLevelNat',
@@ -53,7 +54,7 @@ module.exports = {
                 {name: 'UniqueTag',type:'text',new:true},
                 {name: 'HUBsearch',type:'text',new:true},
                 {name: 'TagHubText',type:'text',new:true},
-                {name:'ViewName',wabName:'View Name',type:'text',new:true}
+                {name:'ViewName',exportName:'View Name',type:'text',new:true}
             ]
         },
         community_uuids: {
@@ -62,5 +63,9 @@ module.exports = {
         national_uuids: {
             key: 'metadataID'
         }
-    }
+    },
+//can set default export here so you don't need to keep setting on command line
+//Note: can't always assume that export type equals project since might have multiple export types per project
+//In this case exportType is equal to project so don't really need to set this but do it just for future reference.
+    exportType: 'ea'
 };

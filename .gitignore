@@ -18,3 +18,8 @@ db/prod/prod-api.db
 
 #don't check in .dev-link config file because only want to use them to link locally
 .dev-link
+
+#don't check in the defaults config because it is configuration for local users
+config/defaults.js
+#don't check in project.js because it is default project for local users
+config/project.js

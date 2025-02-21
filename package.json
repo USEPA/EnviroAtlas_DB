@@ -8,6 +8,9 @@
   "scripts": {
     "devLink": "usepa-ngst-dev-link npmLink"
   },
+  "bin": {
+    "db-csv-changes": "./scripts/db-csv-changes.js"
+  },
   "dependencies": {
     "@usepa-ngst/utilities": "^0.0.5",
     "app-root-path": "^3.1.0",

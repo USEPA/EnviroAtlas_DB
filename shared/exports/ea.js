@@ -13,6 +13,11 @@ const booleanIconMappings = {
     eaBC: "Biodiversity Conservation - x"
 };
 
+async function runExport({exportFile,dbLib}) {
+    await writeWabConfig({jsonfile:exportFile,dbLib});
+    console.log(`EA WAB JSON config file exported to ${exportFile} from db=${dbLib.dbfile}`);
+}
+
 async function writeWabConfig({jsonfile,dbLib,where,values}) {
     const sw = new utilities.streamWriter();
 
@@ -78,10 +83,10 @@ function processRow({dbRow,wabRow,fields}) {
             } else if (field.type==='boolean') {
                 wabValue = wabValue ? true : false;
             }
-            wabRow[field.wabName] = wabValue;
+            wabRow[field.exportName] = wabValue;
         }
     }
 }
 
-module.exports = {writeWabConfig};
+module.exports = {runExport,writeWabConfig};
 
