@@ -67,5 +67,6 @@ module.exports = {
 //can set default export here so you don't need to keep setting on command line
 //Note: can't always assume that export type equals project since might have multiple export types per project
 //In this case exportType is equal to project so don't really need to set this but do it just for future reference.
+//Setting it here instead of config/defaults so that is it checked in since it doesn't have to be specific to local machine like say export file.
     exportType: 'ea'
 };
