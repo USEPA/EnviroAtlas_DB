@@ -58,6 +58,9 @@ async function writeWabConfig({jsonfile,dbLib,where,values}) {
                 if (!('areaGeog' in subTopicWabRow)) subTopicWabRow.areaGeog = layer.areaGeog.split(',');
                 //also layer also needs the scale from subTopic
                 if ('scale' in subtopic) layerWabRow.eaScale = subtopic.scale;
+                //also since we dropped sourceType from subtopics table add it back from layers table to rows with subLayerIDs in wab config
+                //just pick the first layer to use since sourceType is same across all layers so far
+                if (!('sourceType' in subTopicWabRow)) subTopicWabRow.sourceType = layer.sourceType;
             }
             wabRows.push(layerWabRow);
             layerWabRow = {};

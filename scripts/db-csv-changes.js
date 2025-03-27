@@ -49,7 +49,7 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
         help.push('');
         help.push('--exportType <export type> = exportType is usually equal to the project but can be different if multiple exports set up for single project. export code is set up in shared\exports.');
         help.push('--exportFile <export file> = path to export file. relative path is relative to folder script called from.');
-        help.push('Note: default exportType and/or exportFile can be set up in config\defaults.js file or in config\projects\<project>.js for each project');
+        help.push('Note: default exportType and/or exportFile can be set up in config/defaults.js file or in config/projects/<project>.js for each project. exportFile can be string used for all db, or object keyed by db to allow different files for each db');
         help.push('');
         help.push('--project <project> = project config file to be used from config/projects/<project>. default project set up locally in config/project otherwise project=ea');
         help.push('');
@@ -233,7 +233,6 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
                     console.log('None');
                 }
             } else if (cmd='export') {
-                //3rd argument is usually change
                 let exportType = args.exportType;
                 if (!exportType) exportType = config.exportType;
                 //if export type not set then try to get it from project
@@ -247,7 +246,13 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
                 }
                 //4th argument is usually table
                 let exportFile = args.exportFile;
-                if (!exportFile) exportFile = config.exportFile;
+                if (!exportFile) {
+                    if (typeof(config.exportFile)==="object") {
+                        exportFile = config.exportFile[db];
+                    } else {
+                        exportFile = config.exportFile;
+                    }
+                }
                 if (!exportFile) throw 'export file path is required for export';
                 if (!path.isAbsolute(exportFile)) {
                     exportFile = process.cwd() + '\\' + exportFile;
@@ -276,7 +281,13 @@ async function getAllChangeFolders(db) {
     }
     let src = `${appRoot.path}\\changes\\${db}`;
     let files = await fse.readdir(src);
-    return files;
+//Note: we want to allow a gitignore so we can have an empty changes/staging|prod folder but only want to return change folders from here
+    let folders = [];
+    for (let file of files) {
+        let stats = await fse.stat(`${src}\\${file}`);
+        if (stats.isDirectory()) folders.push(file);
+    }
+    return folders;
 }
 
 async function getChangeFolders(change,db) {

@@ -22,7 +22,8 @@ module.exports = {
                 {name:'eaRCA',type:'boolean'},
                 {name:'eaPBS',type:'text'},
                 {name:'tags',exportName:'eaTags',type:'array'},
-                'sourceType'
+// Got rid of this since already on layer.
+//                'sourceType'
             ]
         },
         layers: {
