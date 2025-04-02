@@ -36,7 +36,7 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
         help.push('eg. db-csv-changes list staging would list all csv change folders in staging folder');
         help.push('');
         help.push('init: create insert file with header in change = <change> for table=<table1>,<table2> in db=<db>');
-        help.push('eg. db-csv-changes init local change1 subtopics,layers would create local/change2/subtopics-insert.csv and local/change2/layers-insert.csv file with all fields as header');
+        help.push('eg. db-csv-changes init local change1 subtopics,layers would create local/change1/subtopics-insert.csv and local/change1/layers-insert.csv file with all fields as header');
         help.push('');
         help.push('load: load change = <change> to db=<db>');
         help.push('eg. db-csv-changes load staging * would import all csv files in staging folder to staging db');
