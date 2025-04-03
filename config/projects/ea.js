@@ -22,8 +22,7 @@ module.exports = {
                 {name:'eaRCA',type:'boolean'},
                 {name:'eaPBS',type:'text'},
                 {name:'tags',exportName:'eaTags',type:'array'},
-// Got rid of this since already on layer.
-//                'sourceType'
+                'sourceType'
             ]
         },
         layers: {
@@ -47,7 +46,8 @@ module.exports = {
                 {name:'popup',type:'object'},
                 {name:'popupLayers',exportName:'layers',type:'object'},
                 {name:'numDecimal',type:'integer'},
-                'sourceType',
+// Got rid of this on layers. Only keep on subtopics since it is same for every layer on a subtopic
+//                'sourceType',
                 'cacheLevelNat',
                 'DownloadSource',
                 {name:'areaGeog',type:'array'},
