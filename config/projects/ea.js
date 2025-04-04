@@ -20,10 +20,10 @@ module.exports = {
                 {name:'eaFFM',type:'boolean'},
                 {name:'eaNHM',type:'boolean'},
                 {name:'eaRCA',type:'boolean'},
-                {name:'eaPBS',type:'text'},
+//Don't want eaPBS in config file anymore
+//                {name:'eaPBS',type:'text'},
                 {name:'tags',exportName:'eaTags',type:'array'},
-// Got rid of this since already on layer.
-//                'sourceType'
+                'sourceType'
             ]
         },
         layers: {
@@ -35,7 +35,8 @@ module.exports = {
                 'name',
                 {name:'subLayerName',type:'text',new:true},
                 {name:'description',exportName:'eaDescription',type:'text'},
-                {name:'metric',exportName:'eaMetric',type:'text'},
+//Don't want metric in DB or config file anymore
+//                {name:'metric',exportName:'eaMetric',type:'text'},
                 {name:'dfsLink',exportName:'eaDfsLink',type:'text'},
                 {name:'metadataID',exportName:'eaMetadata',type:'text'},
                 'url',
@@ -46,12 +47,15 @@ module.exports = {
                 {name:'serviceType',exportName:'type',type:'text'},
                 {name:'popup',type:'object'},
                 {name:'popupLayers',exportName:'layers',type:'object'},
-                {name:'numDecimal',type:'integer'},
-                'sourceType',
+//Don't want numDecimal in config file anymore
+//                {name:'numDecimal',type:'integer'},
+// Got rid of this on layers. Only keep on subtopics since it is same for every layer on a subtopic
+//                'sourceType',
                 'cacheLevelNat',
                 'DownloadSource',
                 {name:'areaGeog',type:'array'},
-                'agoID',
+//Don't want agoID in config file anymore
+//                'agoID',
                 {name: 'UniqueTag',type:'text',new:true},
                 {name: 'HUBsearch',type:'text',new:true},
                 {name: 'TagHubText',type:'text',new:true},

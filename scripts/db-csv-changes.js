@@ -28,7 +28,7 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
         help.push('');
         help.push('db = local, staging or prod (local not committed to repo. just for development.)');
         help.push('');
-        help.push('change = name of folder with csv files containing changes. Note: change = * will import/init all folders for specified db. table = * will init all tables for specific db.');
+        help.push('change = name of folder with csv files containing changes (or leading number before dash in folder name eg. 1-firstChange). Note: change = * will import/init all folders for specified db. table = * will init all tables for specific db.');
         help.push('');
         help.push('cmd = list, init, load, deploy, or export');
         help.push('');
@@ -36,7 +36,7 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
         help.push('eg. db-csv-changes list staging would list all csv change folders in staging folder');
         help.push('');
         help.push('init: create insert file with header in change = <change> for table=<table1>,<table2> in db=<db>');
-        help.push('eg. db-csv-changes init local change1 subtopics,layers would create local/change2/subtopics-insert.csv and local/change2/layers-insert.csv file with all fields as header');
+        help.push('eg. db-csv-changes init local change1 subtopics,layers would create local/change1/subtopics-insert.csv and local/change1/layers-insert.csv file with all fields as header');
         help.push('');
         help.push('load: load change = <change> to db=<db>');
         help.push('eg. db-csv-changes load staging * would import all csv files in staging folder to staging db');
@@ -134,7 +134,7 @@ let dbSources = {local:'',staging:'local',prod:'staging'};
                     throw 'change can only be deployed to db = staging or prod';
                 }
                 if (!change) {
-                    throw 'change folder name is required for cmd=deploy or load';
+                    throw 'change folder name/number is required for cmd=deploy or load';
                 }
                 if (['staging','prod'].includes(db)) {
                     let gitBranch = await getGitBranch(appRoot.path);

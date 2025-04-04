@@ -1,0 +1,3 @@
+layerID,Name,subLayerName,dfsLink,url,areaGeog
+430,Dasymetric allocation of population 2010 CONUS,CONUS 2010,Supplemental/Dasymetricallocationofpopulation2010.pdf,https://enviroatlas.epa.gov/arcgis/rest/services/Supplemental/Dasymetric_WMerc/MapServer,CONUS
+518,"Dasymetric allocation of population 2020 CONUS, Alaska, Hawaii, Puerto Rico, and the U.S. Virgin Islands","CONUS, AK, HI, PR, VI 2020",Supplemental/Dasymetricallocationofpopulation2020.pdf,https://enviroatlas.epa.gov/arcgis/rest/services/Rasters/Dasymetric_2020/ImageServer,"CONUS,Alaska,Hawaii,Puerto Rico,Virgin Islands"
