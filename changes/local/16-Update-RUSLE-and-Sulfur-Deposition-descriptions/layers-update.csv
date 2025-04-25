@@ -1,0 +1,6 @@
+layerID,name,description
+105,Annual sulfur dry deposition (kg/ha),This map estimates the annual dry deposition of sulfur within each subwatershed (12-digit HUC) in kilograms per hectare for 2017. Dry deposition occurs when particles or gases attach to surfaces such as dust or smoke and fall to the earth's surface.
+542,Soil loss (tonnes per hectare) [grid] - Existing land cover,This map depicts the average annual soil loss in metric tonnes per hectare under 2011 land use/land cover.
+543,Soil loss (tonnes per hectare) [grid] - Natural vegetation removed,This map depicts the average annual soil loss in metric tonnes per hectare under a 2011 land use/land cover scenario in which natural vegetation has been replaced with barren land.
+544,Sediment yield (tonnes per hectare) [grid] - Existing land cover,This map depicts the average annual sediment yield to waterbodies in metric tonnes per hectare under 2011 land use/land cover.
+545,Sediment yield (tonnes per hectare) [grid] - Natural vegetation removed,This map depicts the average annual sediment yield to the nearest waterbody in metric tonnes per hectare under a 2011 land use/land cover scenario in which natural vegetation has been replaced with barren land.

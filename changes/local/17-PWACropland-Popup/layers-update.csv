@@ -1,0 +1,2 @@
+layerID,popup
+541,"{""showAttachments"":""false"",""fieldInfos"":[{""fieldName"":""pct_PWAC"",""label"":""Percent potential wetland areas on cropland"",""format"":{""digitSeparator"":true,""places"":3},""visible"":""true""}],""title"":""HUC 12 ID: {HUC_12}""}"
