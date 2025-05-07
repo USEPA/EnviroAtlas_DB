@@ -1,0 +1,3 @@
+layerID,subLayerName,url,serviceType
+430,2010 - CONUS,https://enviroatlas.epa.gov/arcgis/rest/services/Rasters/Dasymetric_Population_CONUS_2010_V3/ImageServer,IMAGE
+518,"2020 - CONUS, AK, HI, PR, VI ",https://enviroatlas.epa.gov/arcgis/rest/services/Rasters/Dasymetric_2020/ImageServer,IMAGE
