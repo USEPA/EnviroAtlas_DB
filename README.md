@@ -5,10 +5,10 @@
 A Repository for the EnviroAtlas Database
 
 Code in this repository hydrates the EnviroAtlas mapping application (https://enviroatlas.epa.gov/enviroatlas/interactivemap/) user interface and mapping functionality. 
-    - changes - this folder tracks changes to the SQLite db
-    - config - this folder describes configurations for scripts
-    - db - this folder contains SQLite db 
-    - scripts - this folder contains scripts to maintain and export db contents for the EA mapping application
+- changes - this folder tracks changes to the SQLite db
+- config - this folder describes configurations for scripts
+- db - this folder contains SQLite db 
+- scripts - this folder contains scripts to maintain and export db contents for the EA mapping application.
         To execute, you must have node >20.9.0 installed and run node ./scripts/db-csv-changes.js
 
 ## Branches
