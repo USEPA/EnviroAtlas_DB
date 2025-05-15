@@ -11,6 +11,14 @@ Code in this repository hydrates the EnviroAtlas mapping application (https://en
 - scripts - this folder contains scripts to maintain and export db contents for the EA mapping application.
         To execute, you must have node >20.9.0 installed and run node ./scripts/db-csv-changes.js
 
+## How to use db-csv-changes script
+1. Open a command prompt. 
+2. Change directory to the location of the repo file \EnviroAtlas_DB\scripts
+3. Call the script without arguments. Run `node db-csv-changes` to see more detailed help printed to the command prompt.
+4. To export EnviroAtlas v3 configuration data, run `db-csv-changes export prod --exportType=ea --exportFile=<wab config file path>`. The exported config file is saved by default to the \EnviroAtlas_DB\scripts folder.
+5. Load into [v3 mapping application](https://github.com/USEPA/EnviroAtlas_JSApp/tree/main/widgets/SimpleSearchFilter) as `config-layer.json`
+
+
 ## Branches
 Please note, branches are under development and have not been fully QA/QC'ed.
 
