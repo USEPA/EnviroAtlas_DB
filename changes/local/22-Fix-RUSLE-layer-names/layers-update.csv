@@ -1,0 +1,5 @@
+layerID,name,subLayerName
+389,Soil loss - Land cover (2011) (tonnes) [12-digit HUC],Land cover (2011) 
+392,Sediment yield -  Land cover (2011) (tonnes) [12-digit HUC],Land cover (2011) 
+542,Soil loss (tonnes per hectare) [grid] - Land cover (2011) ,Land cover (2011) 
+544,Sediment yield (tonnes per hectare) [grid] - Land cover (2011) ,Land cover (2011) 
