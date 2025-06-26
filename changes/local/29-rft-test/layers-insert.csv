@@ -1,0 +1,2 @@
+layerID,subTopicID,eaID,name,subLayerName,description,dfsLink,metadataID,url,lyrNum,tags,tileLink,tileURL,serviceType,popup,numDecimal,cacheLevelNat,DownloadSource,areaGeog,agoID,UniqueTag,HUBsearch,TagHubText,ViewName,popupLayers
+548,130,,Estimated floodplains (current land use),Current land use,,,,https://awseastaging.epa.gov/arcgis/rest/services/Rasters/SMA_2023/ImageServer,,,renderer,NLCD-flood,IMAGE,,,,,CONUS,,,,,,
