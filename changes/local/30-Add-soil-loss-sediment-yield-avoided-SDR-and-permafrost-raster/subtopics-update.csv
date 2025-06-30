@@ -1,0 +1,13 @@
+subTopicID,name,description
+350,Soil loss (tonnes) [12-digit HUC],"These maps depict the average annual soil loss in metric tonnes under 2011 land use/land cover, a scenario in which 2011 natural land cover is replaced with barren land, and the difference between the two scenarios within each subwatershed (12-digit HUC)."
+351,Sediment yield (tonnes) [12-digit HUC],"These maps depict the average annual sediment yield to waterbodies in metric tonnes under 2011 land use/land cover, a scenario in which 2011 natural land cover is replaced with barren land, and the difference between the two scenarios within each subwatershed (12-digit HUC)."
+369,Soil loss (tonnes per hectare) [grid],"These maps depict the average annual soil loss in metric tonnes per hectare under 2011 land use/land cover, a 2011 land use/land cover scenario in which natural land cover is replaced with barren land, and the soil loss that was avoided due to natural vegetation."
+370,Sediment yield (tonnes per hectare) [grid],"These maps depict the average annual sediment yield to waterbodies in metric tonnes per hectare under 2011 land use/land cover, a 2011 land use/land cover scenario in which natural land cover is replaced with barren land, and the sediment yield that was avoided due to natural vegetation."
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
