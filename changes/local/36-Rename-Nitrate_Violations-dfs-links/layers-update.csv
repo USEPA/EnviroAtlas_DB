@@ -1,8 +1,6 @@
-layerID,name,dfsLink
-387,Nitrate violation index - Groundwater,ESN/Drinkingwaternitrateviolation.pdf
-388,Nitrate violation index - Surface water,ESN/Drinkingwaternitrateviolation.pdf
-180,Percent agriculture on hydric soil,ESN/Percentagricultureonhydricsoil.pdf
-153,Ecological integrity of stream confluence catchments and watersheds ,Supplemental/Streamconfluences.pdf
-264,Average width of stream buffers downstream from agriculture (meters) ,ESN/Averagewidthofstreambuffersdownstreamfromagriculture.pdf
-262,Percent nonbuffered agriculture,ESN/Percentunbufferedagriculture.pdf
-263,Percent of agriculture that is buffered,ESN/Percentbufferedagriculture.pdf
+layerID,dfsLink
+387,ESN/Drinkingwaternitrateviolation.pdf
+388,ESN/Drinkingwaternitrateviolation.pdf
+395,Supplemental/Streamconfluences.pdf
+262,ESN/Percentunbufferedagriculture.pdf
+263,ESN/Percentbufferedagriculture.pdf
