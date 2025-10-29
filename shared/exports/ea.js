@@ -14,7 +14,11 @@ const booleanIconMappings = {
 };
 
 async function runExport({exportFile,dbLib}) {
-    await writeWabConfig({jsonfile:exportFile,dbLib});
+//Old WAB system will only have isLegacy sub topics now.
+//all layers on isLegacy sub topic will be isLegacy layer
+    let where = 'isLegacy = $isLegacy';
+    let values = {isLegacy:1};
+    await writeWabConfig({jsonfile:exportFile,dbLib,where,values});
     console.log(`EA WAB JSON config file exported to ${exportFile} from db=${dbLib.dbfile}`);
 }
 
