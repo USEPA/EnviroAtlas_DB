@@ -14,11 +14,12 @@ const booleanIconMappings = {
 };
 
 async function runExport({exportFile,dbLib}) {
-//Old WAB system will only have isLegacy sub topics now.
-//all layers on isLegacy sub topic will be isLegacy layer
+/* Not using isLegacy column anymore
     let where = 'isLegacy = $isLegacy';
     let values = {isLegacy:1};
-    await writeWabConfig({jsonfile:exportFile,dbLib,where,values});
+ await writeWabConfig({jsonfile:exportFile,dbLib,where,values});
+*/
+    await writeWabConfig({jsonfile:exportFile,dbLib});
     console.log(`EA WAB JSON config file exported to ${exportFile} from db=${dbLib.dbfile}`);
 }
 
@@ -26,7 +27,8 @@ async function writeWabConfig({jsonfile,dbLib,where,values}) {
     const sw = new utilities.streamWriter();
 
 //    let subtopics = await dbLib.select({table:'subtopics',where,values,keyValue:241,limit:1});
-    let subtopics = await dbLib.select({table:'subtopics',where,values});
+//legacy WAB app now uses legacySubtopics table that keys to layer via legacySubtopics.subTopicID=layers.legacySubTopicID
+    let subtopics = await dbLib.select({table:'legacySubtopics',where,values});
     let wabRows = [];
     for (let subtopic of subtopics) {
         let subTopicWabRow = {};
@@ -36,9 +38,9 @@ async function writeWabConfig({jsonfile,dbLib,where,values}) {
                 subTopicWabRow.eaBCSDD.push(booleanIconLabel);
             }
         }
-        processRow({wabRow:subTopicWabRow,dbRow:subtopic,fields:dbLib.config.tables.subtopics.fields});
+        processRow({wabRow:subTopicWabRow,dbRow:subtopic,fields:dbLib.config.tables.legacySubtopics.fields});
 
-        let layers = await dbLib.select({table:'layers',where:'subTopicID = $subTopicID',values:{subTopicID:subtopic.subTopicID}});
+        let layers = await dbLib.select({table:'layers',where:'legacySubTopicID = $legacySubTopicID',values:{legacySubTopicID:subtopic.subTopicID}});
 
         //if this has "sub layers" then the layers are all on their own row
         //if no "sub layer" then subtopic and layer on same row
