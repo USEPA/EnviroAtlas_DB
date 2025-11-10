@@ -1,5 +1,6 @@
 //Place to store configuratin for db-csv-change script
-module.exports = {
+
+let config = {
     tables: {
         subtopics: {
 //including the key allows script to check if item has been inserted so we don't get duplicates
@@ -31,6 +32,7 @@ module.exports = {
             fields: [
                 {name: 'layerID',type:'integer',key:true,new:true},
                 {name: 'subTopicID',type:'integer',new:true},
+                {name: 'legacySubTopicID',type:'integer',new:true},
                 {name:'eaID',type:'integer'},
                 'name',
                 {name:'subLayerName',type:'text',new:true},
@@ -75,3 +77,8 @@ module.exports = {
 //Setting it here instead of config/defaults so that is it checked in since it doesn't have to be specific to local machine like say export file.
     exportType: 'ea'
 };
+
+//legacy subtopics is same as subtopics. if fields change at some point we can modify for fields not need but need to make sure we make copy of config object
+config.tables.legacySubtopics = config.tables.subtopics;
+
+module.exports = config;
