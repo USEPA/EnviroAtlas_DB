@@ -1,0 +1,4 @@
+subTopicID,eaID,topic,categoryTab,scale,name,description,eaBC,eaCA,eaCPW,eaCS,eaFFM,eaNHM,eaRCA,eaPBS,eaCL,tags,sourceType
+53,,Connected Landscapes,,,Forest Connectivity (2016),"This EnviroAtlas dataset categorizes land cover into structural elements such as core, edge, or connector.",1,,,,,,1,,,,grid
+54,,Connected Landscapes,,,"Natural Areas Connectivity, Including Water (2016)","This EnviroAtlas dataset categorizes land cover into structural elements such as core, edge, or connector.",1,,,,,,1,,,,grid
+55,,Connected Landscapes,,,"Natural Areas Connectivity, Without Water (2016)","This EnviroAtlas dataset categorizes land cover into structural elements such as core, edge, or connector.",1,,,,,,1,,,,grid
