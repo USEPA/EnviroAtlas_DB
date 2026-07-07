@@ -1,0 +1,8 @@
+﻿tableServiceName,metadataID,uuid
+Agriculture_connectivity_CONUS_2024,N160,8A86218D-899E-4386-9833-368E62E29693
+Forest_connectivity_CONUS_2024,N161,265AC7DE-57EE-4C93-A9B0-D1161CCA8956
+Forest_connectivity_AK_2016,N162,297E7BD1-0932-4460-B396-0F92A65B451A
+Natural_land_cover_connectivity_water_as_foreground_CONUS_2024,N163,2719A40A-A18E-4D64-9174-BAE72BC0EFFF
+Natural_land_cover_connectivity_water_as_foreground_AK_2016,N164,6C5BEF0C-72F1-4D09-AA3F-70BA82563A6E
+Natural_land_cover_connectivity_water_as_background_CONUS_2024,N165,6A4CCE86-CD78-42CB-9465-1453EDAE7F74
+Natural_land_cover_connectivity_water_as_background_AK_2016,N166,DE535F10-F9CF-4AFD-963E-4F22F2233C7F
