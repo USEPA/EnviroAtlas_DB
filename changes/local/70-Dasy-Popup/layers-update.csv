@@ -1,0 +1,3 @@
+layerID,popup
+430,"{""fieldInfos"":[{""fieldName"":""Raster.ServicePixelValue.Raw"",""label"":""Dasymetric allocation of population"",""visible"":""true"",""format"":{""digitSeparator"":true,""places"":2}}],""title"":""Dasymetric allocation of population 2010 CONUS""}"
+518,"{""fieldInfos"":[{""fieldName"":""Raster.ServicePixelValue.Raw"",""label"":""Dasymetric allocation of population"",""visible"":""true"",""format"":{""digitSeparator"":true,""places"":2}}],""title"":""Dasymetric allocation of population 2020 CONUS, Alaska, Hawaii, Puerto Rico, and the U.S. Virgin Islands""}"
